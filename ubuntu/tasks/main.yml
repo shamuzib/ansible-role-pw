@@ -1,19 +1,44 @@
 ---
-# tasks file for ubuntu
-# Changing Ubuntu hostname needs updating two files which are /etc/hostname & /etc/hosts
-# Lineinfile module is used to update the both
-# command to check is hostname, but it'll get updated only after rebooting the system
+#tasks file for ubuntu
+#Changing Ubuntu hostname needs updating two files which are /etc/hostname & /etc/hosts
+#Lineinfile module is used to update the both
+#command to check is hostname, but it'll get updated only after rebooting the system
 - name: changing System Name in hostname file
-    lineinfile:
-      path: /etc/hostname
-      state: present
-      line: "{{ ansible_distribution }}_{{ author_name }}"
-      backrefs: yes
-      regexp: 'Ubuntu*'
+  lineinfile:
+    path: /etc/hostname
+    state: present
+    line: "{{ ansible_distribution }}_{{ author_name }}"
+    backrefs: yes
+    regexp: 'Ubuntu*'
 - name: changing system name in hosts file
-    lineinfile:
-      path: /etc/hosts
-      state: present
-      regexp: '^127\.0\.0\.1'
-      backrefs: yes
-      line: '127.0.0.1 "{{ ansible_distribution }}_{{ author_name }}"'
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    state: present
+    regexp: '^127\.0\.0\.1'
+    backrefs: yes
+    line: '127.0.0.1 "{{ ansible_distribution }}_{{ author_name }}"'
+# Creating Ansible user
+- name: creating ansible user on the system
+  ansible.builtin.user:
+    name: '{{ item.name }}'
+    password: "{{ '{{ item.password }}' | password_hash('sha512')}}"
+    groups: "{{ item.groups }}"
+    state: present
+    shell: "/bin/bash"
+    create_home: yes
+  with_items: "{{ user_details }}"
+# Attaching timestamp to history command
+- name: modifying bashrc file
+  lineinfile:
+    path: "{{ item }}"
+    line: HISTTIMEFORMAT='%F %T'
+- name: sourcing .bashrc file
+  shell: . "{{ item }}"
+  with_items: "{{ file_names }}"
+# Installing packages
+- name: Installing packages
+  package: 
+    name: "{{ item }}" 
+    state: latest
+  with_items: "{{ packages }}"
+  notify: restart services

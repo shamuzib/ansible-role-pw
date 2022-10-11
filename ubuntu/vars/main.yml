@@ -1,2 +1,15 @@
 ---
 # vars file for ubuntu
+author_name: muzib
+user_details:
+- name: ansible
+  password: ansible
+  groups: adm
+file_names:
+- ~/.bashrc
+- /etc/profile
+packages:
+- git
+- chrony
+r_packages:
+- ntpdate

@@ -1,2 +1,6 @@
 ---
 # vars file for centos
+author_name: muzib
+packages:
+- iotop
+- sysstat

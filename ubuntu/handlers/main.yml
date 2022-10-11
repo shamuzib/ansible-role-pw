@@ -1,2 +1,7 @@
 ---
 # handlers file for ubuntu
+- name: notify restarts
+  ansible.builtin.service:
+    name: '{{ item }}'
+    state: restarted
+  with_items: '{{ packages }}'
