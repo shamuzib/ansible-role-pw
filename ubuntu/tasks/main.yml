@@ -1,2 +1,19 @@
 ---
 # tasks file for ubuntu
+# Changing Ubuntu hostname needs updating two files which are /etc/hostname & /etc/hosts
+# Lineinfile module is used to update the both
+# command to check is hostname, but it'll get updated only after rebooting the system
+- name: changing System Name in hostname file
+    lineinfile:
+      path: /etc/hostname
+      state: present
+      line: "{{ ansible_distribution }}_{{ author_name }}"
+      backrefs: yes
+      regexp: 'Ubuntu*'
+- name: changing system name in hosts file
+    lineinfile:
+      path: /etc/hosts
+      state: present
+      regexp: '^127\.0\.0\.1'
+      backrefs: yes
+      line: '127.0.0.1 "{{ ansible_distribution }}_{{ author_name }}"'
