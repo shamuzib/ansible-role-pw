@@ -28,13 +28,14 @@
     create_home: yes
   with_items: "{{ user_details }}"
 # Attaching timestamp to history command
-- name: modifying bashrc file
+- name: modifying "{{ item }}" file
   lineinfile:
     path: "{{ item }}"
     line: HISTTIMEFORMAT='%F %T'
-- name: sourcing .bashrc file
-  shell: . "{{ item }}"
   with_items: "{{ file_names }}"
+#- name: sourcing "{{ item }}" file
+#  shell: . "{{ item }}"
+#  with_items: "{{ file_names }}"
 # Installing packages
 - name: Installing packages
   package: 

@@ -1,2 +1,7 @@
 ---
 # handlers file for centos
+- name: restart services
+  ansible.builtin.service:
+    name: '{{ item }}'
+    state: restarted
+  with_items: '{{ packages }}'

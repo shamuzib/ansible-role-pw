@@ -6,7 +6,7 @@ user_details:
   password: ansible
   groups: adm
 file_names:
-- ~/.bashrc
+- .bashrc
 - /etc/profile
 packages:
 - git
