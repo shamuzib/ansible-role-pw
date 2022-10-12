@@ -2,7 +2,7 @@
 # tasks file for centos
 - name: Directory creation
   ansible.builtin.file:
-    path: "{{ author_name }}"
+    path: /tmp/{{ author_name }}
     state: directory
     mode: '644'
 - name: Installing packages

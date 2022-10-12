@@ -12,4 +12,4 @@ packages:
 - git
 - chrony
 r_packages:
-- ntpdate
+- ntp

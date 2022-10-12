@@ -4,12 +4,7 @@
 #Lineinfile module is used to update the both
 #command to check is hostname, but it'll get updated only after rebooting the system
 - name: changing System Name in hostname file
-  lineinfile:
-    path: /etc/hostname
-    state: present
-    line: "{{ ansible_distribution }}_{{ author_name }}"
-    backrefs: yes
-    regexp: 'Ubuntu*'
+  shell: hostnamectl set-hostname "{{ ansible_distribution }}-{{ author_name }}"
 - name: changing system name in hosts file
   ansible.builtin.lineinfile:
     path: /etc/hosts
@@ -43,3 +38,22 @@
     state: latest
   with_items: "{{ packages }}"
   notify: restart services
+#Removing ntp package
+- name: Removing NTP package
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ r_packages }}"
+- name: Reboot the server
+  ansible.builtin.reboot:
+    reboot_timeout: 3600
+- name: Wait for the reboot and reconnect 
+  wait_for:
+    port: 22
+    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+    search_regex: OpenSSH
+    delay: 10
+    timeout: 60
+- name: Check the Uptime of the servers
+  shell: "uptime"
+  register: Uptime
