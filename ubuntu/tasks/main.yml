@@ -1,8 +1,18 @@
 ---
 #tasks file for ubuntu
+
+#Print hostname
+- name: print current hostname
+  shell: hostname 
+  register: log
+- name: priting log from hostname task
+  debug:
+    var: log
+
 #Changing Ubuntu hostname needs updating two files which are /etc/hostname & /etc/hosts
-#Lineinfile module is used to update the both
+#Lineinfile module is used to update /etc/hosts file and command hostnamectl is used to update the /etc/hostname file
 #command to check is hostname, but it'll get updated only after rebooting the system
+#reboot is done at the end of the file to avoid interruptions
 - name: changing System Name in hostname file
   shell: hostnamectl set-hostname "{{ ansible_distribution }}-{{ author_name }}"
 - name: changing system name in hosts file
@@ -12,7 +22,12 @@
     regexp: '^127\.0\.0\.1'
     backrefs: yes
     line: '127.0.0.1 "{{ ansible_distribution }}_{{ author_name }}"'
-# Creating Ansible user
+
+#Verifying whether ansible user in the system
+- name: ansible user status
+  shell: cat /etc/passwd | grep ansi* 
+
+# Creating Ansible user along with login shell & home directory
 - name: creating ansible user on the system
   ansible.builtin.user:
     name: '{{ item.name }}'
@@ -22,38 +37,39 @@
     shell: "/bin/bash"
     create_home: yes
   with_items: "{{ user_details }}"
-# Attaching timestamp to history command
+
+# Attaching timestamp to history command so that history command will show timestamp of command executed
 - name: modifying "{{ item }}" file
   lineinfile:
     path: "{{ item }}"
     line: HISTTIMEFORMAT='%F %T'
   with_items: "{{ file_names }}"
-#- name: sourcing "{{ item }}" file
-#  shell: . "{{ item }}"
-#  with_items: "{{ file_names }}"
-# Installing packages
+
+#Installing Packages
 - name: Installing packages
   package: 
     name: "{{ item }}" 
     state: latest
   with_items: "{{ packages }}"
   notify: restart services
+
 #Removing ntp package
 - name: Removing NTP package
   package:
     name: "{{ item }}"
     state: absent
   with_items: "{{ r_packages }}"
+
+#rebooting system to reflect changes executed
 - name: Reboot the server
   ansible.builtin.reboot:
     reboot_timeout: 3600
-- name: Wait for the reboot and reconnect 
-  wait_for:
-    port: 22
-    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
-    search_regex: OpenSSH
-    delay: 10
-    timeout: 60
+  notify: Wait for the reboot and reconnect
+
+#printing system uptime
 - name: Check the Uptime of the servers
   shell: "uptime"
   register: Uptime
+- name: print uptime
+  debug:
+    var: Uptime
