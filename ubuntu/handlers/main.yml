@@ -5,6 +5,7 @@
     name: '{{ item }}'
     state: restarted
   with_items: '{{ packages }}'
+  ignore_errors: yes
 - name: Wait for the reboot and reconnect
   wait_for:
     port: 22

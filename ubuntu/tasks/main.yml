@@ -26,12 +26,20 @@
 #Verifying whether ansible user in the system
 - name: ansible user status
   shell: cat /etc/passwd | grep ansi* 
+  ignore_errors: true
 
 # Creating Ansible user along with login shell & home directory
+- name: create encrypted password
+  shell: python -c 'import crypt; print crypt.crypt("{{ password }}", "$1$SomeSalt$")'
+  register: val
+  delegate_to: localhost
+- name: print encrypted password
+  debug: 
+    var: val.stdout
 - name: creating ansible user on the system
   ansible.builtin.user:
     name: '{{ item.name }}'
-    password: "{{ '{{ item.password }}' | password_hash('sha512')}}"
+    password: "{{ val.stdout }}"
     groups: "{{ item.groups }}"
     state: present
     shell: "/bin/bash"

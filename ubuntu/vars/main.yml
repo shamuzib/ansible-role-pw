@@ -1,9 +1,9 @@
 ---
 # vars file for ubuntu
 author_name: muzib
+password: ansible
 user_details:
 - name: ansible
-  password: ansible
   groups: adm
 file_names:
 - .bashrc
